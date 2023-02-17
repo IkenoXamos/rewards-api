@@ -1,1 +1,91 @@
-
+server:
+  port: 8080
+spring:
+  application:
+    name: rewards
+  profiles:
+    default: local
+cors:
+  allowed-methods:
+    - OPTIONS
+    - GET
+    - PUT
+    - POST
+    - PATCH
+    - DELETE
+  allowed-headers:
+    - Accept
+    - Authorization
+    - Content-Type
+    - Access-Control-Allow-Origin
+    - Access-Control-Allow-Methods
+    - Access-Control-Allow-Headers
+    - Access-Control-Expose-Headers
+  exposed-headers:
+    - Access-Control-Allow-Origin
+    - Access-Control-Allow-Headers
+    - Access-Control-Expose-Headers
+    - Content-Type
+    - Authorization
+    - Accept
+  allow-credentials: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+jwt:
+  secret: ${JWT_SECRET}
+---
+spring:
+  config:
+    activate:
+      on-profile:
+        - local
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:memdb
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console:
+      enabled: true
+      path: /h2
+      settings:
+        trace: false
+        web-allow-others: false
+cors:
+  allowed-origins:
+    - http://localhost:4200 # Local Angular
+    - http://localhost:3000 # Local React
+jwt:
+  secret: local-secret
+---
+spring:
+  config:
+    activate:
+      on-profile:
+        - prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # Fix Postgres JPA Error (Method org.postgresql.jdbc.PgConnection.createClob() is not yet implemented)
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+#cors:
+#  allowed-origins:
+#    - To Be Determined Later
